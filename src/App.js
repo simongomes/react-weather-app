@@ -5,6 +5,7 @@ import { SET_WEATHER, CHANGE_UNIT } from "./store/reducers/weather";
 import {
   CircularProgress,
   Box,
+  Typography,
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -19,6 +20,7 @@ import WeatherChart from "./components/WeatherChart";
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [elimentToShow, setElimentToShow] = useState(3);
   const { unit } = useSelector((state) => state.unit);
   const dispatch = useDispatch();
@@ -28,8 +30,11 @@ function App() {
       const result = await fetch(
         "https://api.openweathermap.org/data/2.5/forecast?q=Munich,de&APPID=afbcbc81f6c77a65fdcb4edaf59b03c6&cnt=40&units=metric"
       ).then((response) => response.json());
-
-      dispatch(SET_WEATHER(result.list));
+      if (result.cod === "200") {
+        dispatch(SET_WEATHER(result.list));
+      } else {
+        setFetchError(true);
+      }
       setLoading(false);
     };
     fetchWeather();
@@ -50,9 +55,12 @@ function App() {
     const result = await fetch(
       "https://api.openweathermap.org/data/2.5/forecast?q=Munich,de&APPID=afbcbc81f6c77a65fdcb4edaf59b03c6&cnt=40&units=metric"
     ).then((response) => response.json());
-
-    dispatch(SET_WEATHER(result.list));
-    dispatch(UPDATE_UNIT("celcius"));
+    if (result.cod === "200") {
+      dispatch(SET_WEATHER(result.list));
+      dispatch(UPDATE_UNIT("celcius"));
+    } else {
+      setFetchError(true);
+    }
     setLoading(false);
   };
 
@@ -64,7 +72,24 @@ function App() {
             <CircularProgress />
           </Box>
         )}
-        {!loading && list && (
+        {fetchError && (
+          <Box
+            className="unit-wrapper"
+            sx={{ display: "flex", justifyContent: "center" }}
+          >
+            <Typography
+              sx={{
+                mb: 2,
+                fontSize: 14,
+                textAlign: "center",
+                fontWeight: "bold",
+              }}
+            >
+              Server Error! Try again Latter
+            </Typography>
+          </Box>
+        )}
+        {!loading && !fetchError && list && (
           <>
             <Box
               className="unit-wrapper"
