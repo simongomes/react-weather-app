@@ -8,6 +8,7 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
+  Button,
 } from "@mui/material";
 import WeatherCard from "./components/WeatherCard";
 import { Carousel } from "@trendyol-js/react-carousel";
@@ -18,7 +19,7 @@ import WeatherChart from "./components/WeatherChart";
 
 function App() {
   const [loading, setLoading] = useState(true);
-
+  const [elimentToShow, setElimentToShow] = useState(3);
   const { unit } = useSelector((state) => state.unit);
   const dispatch = useDispatch();
 
@@ -32,6 +33,7 @@ function App() {
       setLoading(false);
     };
     fetchWeather();
+    window.innerWidth <= 480 ? setElimentToShow(1) : setElimentToShow(3);
   }, [dispatch]);
 
   const list = useSelector((state) => state.weather.weather);
@@ -40,6 +42,18 @@ function App() {
     const { value } = e.target;
     dispatch(UPDATE_UNIT(value));
     dispatch(CHANGE_UNIT(value));
+  };
+
+  const reloadApp = async () => {
+    setLoading(true);
+
+    const result = await fetch(
+      "https://api.openweathermap.org/data/2.5/forecast?q=Munich,de&APPID=afbcbc81f6c77a65fdcb4edaf59b03c6&cnt=40&units=metric"
+    ).then((response) => response.json());
+
+    dispatch(SET_WEATHER(result.list));
+    dispatch(UPDATE_UNIT("celcius"));
+    setLoading(false);
   };
 
   return (
@@ -74,10 +88,13 @@ function App() {
                   label="Farenheit"
                 />
               </RadioGroup>
+              <Button variant="outlined" onClick={reloadApp}>
+                Refresh
+              </Button>
             </Box>
             <div className="carousel-wrapper">
               <Carousel
-                show={3}
+                show={elimentToShow}
                 swiping={true}
                 infinite={false}
                 leftArrow={

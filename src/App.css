@@ -51,4 +51,9 @@
   right: -30px;
 }
 
-/* Unit Styles */
+/* Responsive Styles */
+@media only screen and (max-width: 480px) {
+  .carousel-wrapper {
+    max-width: 230px;
+  }
+}
